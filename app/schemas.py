@@ -4,7 +4,7 @@ Pydantic schemas used for request validation and response serialization.
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr
 
 
 # ---------------- Auth ----------------
@@ -20,22 +20,26 @@ class Token(BaseModel):
 
 
 class AdminOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
     id: int
     username: str
     email: Optional[str] = None
+
+    class Config:
+        orm_mode = True
 
 
 # ---------------- Gallery ----------------
 
 class GalleryImageOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
     id: int
     title: str
     description: Optional[str] = None
     category: Optional[str] = None
     image_url: str
     created_at: datetime
+
+    class Config:
+        orm_mode = True
 
 
 # ---------------- Announcements ----------------
@@ -57,9 +61,11 @@ class AnnouncementUpdate(BaseModel):
 
 
 class AnnouncementOut(AnnouncementBase):
-    model_config = ConfigDict(from_attributes=True)
     id: int
     created_at: datetime
+
+    class Config:
+        orm_mode = True
 
 
 # ---------------- Testimonials ----------------
@@ -83,9 +89,11 @@ class TestimonialUpdate(BaseModel):
 
 
 class TestimonialOut(TestimonialBase):
-    model_config = ConfigDict(from_attributes=True)
     id: int
     created_at: datetime
+
+    class Config:
+        orm_mode = True
 
 
 # ---------------- Comments ----------------
@@ -98,7 +106,6 @@ class CommentCreate(BaseModel):
 
 
 class CommentOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
     id: int
     name: str
     email: Optional[str] = None
@@ -106,3 +113,6 @@ class CommentOut(BaseModel):
     message: str
     is_read: bool
     created_at: datetime
+
+    class Config:
+        orm_mode = True
