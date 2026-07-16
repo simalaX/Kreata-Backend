@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import IntegrityError
 
 from . import models, security
 from .config import settings
@@ -17,15 +18,19 @@ from .routers import announcements, auth, comments, gallery, stats
 
 def _seed_admin(db):
     """Creates the default admin account from env vars if none exists yet."""
-    existing = db.query(models.Admin).filter(models.Admin.username == settings.ADMIN_USERNAME).first()
-    if not existing:
-        admin = models.Admin(
-            username=settings.ADMIN_USERNAME,
-            email=settings.ADMIN_EMAIL,
-            hashed_password=security.hash_password(settings.ADMIN_PASSWORD),
-        )
-        db.add(admin)
-        db.commit()
+    try:
+        existing = db.query(models.Admin).filter(models.Admin.username == settings.ADMIN_USERNAME).first()
+        if not existing:
+            admin = models.Admin(
+                username=settings.ADMIN_USERNAME,
+                email=settings.ADMIN_EMAIL,
+                hashed_password=security.hash_password(settings.ADMIN_PASSWORD),
+            )
+            db.add(admin)
+            db.commit()
+    except IntegrityError:
+        # Another worker beat us to the insert — rollback and continue
+        db.rollback()
 
 
 @asynccontextmanager
